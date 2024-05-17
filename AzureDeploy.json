@@ -1,0 +1,72 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {"name-of-storage-account": {
+        "type": "string",
+        "metadata": {
+            "description": "Enter Storage name"
+        }
+    },
+        "name-of-webapp": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter the webapp name"
+            }
+        },
+        "name-of.appservice-plan": {
+            "type": "string",
+            "metadata": {
+                "description": "Enter App Service plan name"
+            }
+        }},
+    "functions": [],
+    "variables": {},
+    "resources": [{
+        "name": "[parameters('name-of-storage-account')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2023-01-01",
+        "tags": {
+            "displayName": "[parameters('name-of-storage-account')]"
+        },
+        "location": "[resourceGroup().location]",
+        "kind": "StorageV2",
+        "sku": {
+            "name": "Premium_LRS",
+            "tier": "Premium"
+        }
+    },
+        {
+            "name": "[parameters('name-of-webapp')]",
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2022-09-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+                "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/appServicePlan1')]": "Resource",
+                "displayName": "[parameters('name-of-webapp')]"
+            },
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', parameters('name-of.appservice-plan'))]"
+            ],
+            "properties": {
+                "name": "[parameters('name-of-webapp')]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('name-of.appservice-plan'))]"
+            }
+        },
+        {
+            "name": "[parameters('name-of.appservice-plan')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2022-09-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "F1",
+                "capacity": 1
+            },
+            "tags": {
+                "displayName": "[parameters('name-of.appservice-plan')]"
+            },
+            "properties": {
+                "name": "[parameters('name-of.appservice-plan')]"
+            }
+        }],
+    "outputs": {}
+}
